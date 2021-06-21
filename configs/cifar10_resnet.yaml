@@ -5,7 +5,7 @@ exp_cfg:
 agent: ImageClassifier
 agent_cfg:
   input_shape: [3, 32, 32]
-  weight_init: normal
+  weight_init: kaiming_norm_fanout
   criterion: CrossEntropyLoss
   net:
     name: ResNet
@@ -35,7 +35,7 @@ trainer:
   gpus: 1
 
 model_checkpoint:
-  monitor: val_err
+  monitor: val_err_epoch
   filename: '[ResNet-CIFAR10]-{epoch:02d}-{val_err:.2f}'
   save_top_k: 5
   mode: min

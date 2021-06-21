@@ -42,17 +42,39 @@ class ImageClassifier(pl.LightningModule):
         outputs = self(inputs)
         loss = self.criterion(outputs, targets)
         pred = outputs.max(1)[1]
-        err = (1. - (pred.eq(targets.view_as(pred)).sum().item() / targets.numel())) * 100
-        self.log('loss_train', loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
-        self.log('err_train', err, prog_bar=True, logger=True, on_epoch=True, on_step=True)
-        return loss
+        total = targets.numel()
+        correct = pred.eq(targets.view_as(pred)).sum().item()
+        err = (1. - (correct / total)) * 100
+        self.log('train_loss', loss, prog_bar=True, logger=True, on_epoch=True)
+        self.log('train_err', err, prog_bar=True, logger=False, on_step=True)
+        return {'loss': loss, 'correct': correct, 'total': total}
+    
+    def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+        correct, total = [], []
+        for out in outputs:
+            correct += [out['correct']]
+            total += [out['total']]
+        train_err = 100. * (1 - sum(correct) / sum(total))
+        self.log('train_err', train_err, prog_bar=True, logger=True, on_epoch=True)
 
     def validation_step(self, batch, *args, **kwargs) -> Optional[STEP_OUTPUT]:
         inputs, targets = batch
         outputs = self(inputs)
         pred = outputs.max(1)[1]
         loss = self.criterion(outputs, targets)
-        err = (1. - (pred.eq(targets.view_as(pred)).sum().item() / targets.numel())) * 100
+        total = targets.numel()
+        correct = pred.eq(targets.view_as(pred)).sum().item()
+        err = (1. - (correct / total)) * 100
         
-        self.log('val_err', err, prog_bar=True, logger=True, on_epoch=True)
-        self.log('loss_val', loss, prog_bar=True, logger=True)
+        self.log('val_err', err, prog_bar=True, logger=True, on_step=True)
+        self.log('val_loss', loss, prog_bar=True, logger=True, on_step=True)
+
+        return {'correct': correct, 'total': total}
+
+    def validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+        correct, total = [], []
+        for out in outputs:
+            correct += [out['correct']]
+            total += [out['total']]
+        val_err = 100. * (1 - sum(correct) / sum(total))
+        self.log('val_err', val_err, prog_bar=True, logger=True, on_epoch=True)
