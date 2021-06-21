@@ -26,8 +26,6 @@ class ResNet(nn.Module):
                 self.layers += [block]
                 in_channels = out_channels
             
-            
-            
 
         self.gap = nn.AdaptiveAvgPool2d(1)  # global average pooling
         self.classifier = nn.Linear(out_channels, num_classes)

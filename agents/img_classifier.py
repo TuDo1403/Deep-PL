@@ -46,7 +46,6 @@ class ImageClassifier(pl.LightningModule):
         correct = pred.eq(targets.view_as(pred)).sum().item()
         err = (1. - (correct / total)) * 100
         self.log('train_loss', loss, prog_bar=True, logger=True, on_epoch=True)
-        self.log('train_err', err, prog_bar=True, logger=False, on_step=True)
         return {'loss': loss, 'correct': correct, 'total': total}
     
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
@@ -67,7 +66,6 @@ class ImageClassifier(pl.LightningModule):
         err = (1. - (correct / total)) * 100
         
         self.log('val_err', err, prog_bar=True, logger=True, on_step=True)
-        self.log('val_loss', loss, prog_bar=True, logger=True, on_step=True)
 
         return {'correct': correct, 'total': total}
 
