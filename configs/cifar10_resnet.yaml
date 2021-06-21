@@ -1,0 +1,56 @@
+exp_name: CIFAR10-ResNet_0
+exp_cfg:
+  seed: 0
+
+agent: ImageClassifier
+agent_cfg:
+  input_shape: [3, 32, 32]
+  weight_init: normal
+  criterion: CrossEntropyLoss
+  net:
+    name: ResNet
+    kwargs:
+      num_classes: 10
+      phases: [3, 3, 3]
+      reductions: [false, true, true]
+      expansion_rate: 2
+      stem_out_channels: 8
+      use_stem: true
+  optim:
+    name: Adam
+    kwargs:
+      lr: 0.0025
+      betas: [.5, .999]
+      weight_decay: 3.e-3
+  
+  # scheduler:
+  #   name: CosineAnnealingLR
+  #   kwargs:
+  #     T_max: 200
+  #     eta_min: 0
+
+
+trainer:
+  max_epochs: 200
+  gpus: 1
+
+model_checkpoint:
+  monitor: val_err
+  filename: '[ResNet-CIFAR10]-{epoch:02d}-{val_err:.2f}'
+  save_top_k: 5
+  mode: min
+  verbose: true
+
+logger:
+  save_dir:
+  log_graph: true
+
+data_loader:
+  name: CIFAR10
+  kwargs:
+    root: ~/.torch
+    pin_memory: true
+    num_workers: 0
+    batch_size: 16
+    cutout: true
+    cutout_length: 8

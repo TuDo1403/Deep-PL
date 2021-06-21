@@ -9,7 +9,7 @@ class CIFAR10:
     CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
     CIFAR_STD = [0.24703233, 0.24348505, 0.26158768]
     def __init__(self, 
-                 data_folder, 
+                 root, 
                  num_workers, 
                  batch_size, 
                  pin_memory,
@@ -28,12 +28,12 @@ class CIFAR10:
         valid_transform = transforms.Compose([transforms.ToTensor(), 
                                               transforms.Normalize(self.CIFAR_MEAN, self.CIFAR_STD)])
 
-        train_data = datasets.CIFAR10(root=data_folder,
+        train_data = datasets.CIFAR10(root=root,
                                       train=True,
                                       download=True,
                                       transform=train_transform)
 
-        test_data = datasets.CIFAR10(root=data_folder,
+        test_data = datasets.CIFAR10(root=root,
                                      train=False,
                                      download=False,
                                      transform=valid_transform)

@@ -32,6 +32,8 @@ def kaiming_normal_fanout_init(m):
 def init_model(model, method='kaiming_norm_fanin'):
     if method == 'kaiming_norm_fanin':
         model.apply(kaiming_normal_fanin_init)
-    elif method == 'kaiming_norm_fanout':
+    if method == 'kaiming_norm_fanout':
         model.apply(kaiming_normal_fanout_init)
+    if method == 'normal':
+        model.apply(weights_init)
     return model
