@@ -42,4 +42,4 @@ def cli(config):
     )
 
 if __name__ == '__main__':
-    cli(['--config', 'configs/cifar10_resnet.yaml'])
+    cli()

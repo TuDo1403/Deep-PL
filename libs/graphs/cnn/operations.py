@@ -21,7 +21,7 @@ class ConvBNReLU(nn.Module):
                 stride, 
                 padding, 
                 dilation, 
-                bias=False
+                bias=True
             ),
             nn.BatchNorm2d(
                 out_channels,
@@ -64,7 +64,7 @@ class ResidualBLock(nn.Module):
 
         self.conv1 = Conv3x3BNReLU(in_channels, out_channels, stride, affine)
 
-        self.conv2 = Conv3x3BNReLU(out_channels, out_channels, affine)
+        self.conv2 = Conv3x3BNReLU(out_channels, out_channels, affine=affine)
 
         self.downsample = nn.Identity()
         if stride == 2:
