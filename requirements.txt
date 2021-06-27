@@ -1,8 +1,9 @@
-torchvision>=0.9.1
-matplotlib>=3.4.2
-easydict>=1.9
-torch>=1.8.0
-pyyaml>=5.4.1
-pillow>=8.2.0
-pytorch-lightning
-click
+torchvision==0.9.1
+matplotlib==3.4.2
+easydict==1.9
+torch==1.8.1
+pyyaml==5.3.1
+pillow==8.2.0
+pytorch-lightning==1.2.8
+click==8.0.1
+tensorboard==2.5.0

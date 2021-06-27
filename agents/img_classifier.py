@@ -1,6 +1,5 @@
-from typing import Any, Optional
+from typing import Any
 import pytorch_lightning as pl
-from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 
 import torch
 from torch import nn
@@ -37,7 +36,7 @@ class ImageClassifier(pl.LightningModule):
             return {'optimizer': optimizer, 'scheduler': scheduler}
         return optimizer
     
-    def training_step(self, train_batch, *args, **kwargs) -> STEP_OUTPUT:
+    def training_step(self, train_batch, *args, **kwargs):
         inputs, targets = train_batch
         outputs = self(inputs)
         loss = self.criterion(outputs, targets)
@@ -46,7 +45,7 @@ class ImageClassifier(pl.LightningModule):
         correct = pred.eq(targets.view_as(pred)).sum().item()
         return {'loss': loss, 'correct': correct, 'total': total}
     
-    def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+    def training_epoch_end(self, outputs) -> None:
         correct, total = [], []
         for out in outputs:
             correct += [out['correct']]
@@ -54,7 +53,7 @@ class ImageClassifier(pl.LightningModule):
         train_err = 100. * (1 - sum(correct) / sum(total))
         self.log('train_err', train_err, prog_bar=True, logger=True, on_epoch=True)
 
-    def validation_step(self, batch, *args, **kwargs) -> Optional[STEP_OUTPUT]:
+    def validation_step(self, batch, *args, **kwargs):
         inputs, targets = batch
         outputs = self(inputs)
         pred = outputs.max(1)[1]
@@ -64,7 +63,7 @@ class ImageClassifier(pl.LightningModule):
 
         return {'correct': correct, 'total': total}
 
-    def validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+    def validation_epoch_end(self, outputs) -> None:
         correct, total = [], []
         for out in outputs:
             correct += [out['correct']]
