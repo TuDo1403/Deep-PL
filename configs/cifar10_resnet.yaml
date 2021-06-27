@@ -35,8 +35,8 @@ trainer:
   gpus: 1
 
 model_checkpoint:
-  monitor: val_err_epoch
-  filename: '[ResNet-CIFAR10]-{epoch:02d}-{val_err_epoch:.2f}'
+  monitor: val_err
+  filename: '[ResNet-CIFAR10]-{epoch:02d}-{val_err:.2f}'
   save_top_k: 5
   mode: min
   verbose: true
