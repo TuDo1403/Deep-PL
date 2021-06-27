@@ -1,6 +1,6 @@
-exp_name: CIFAR10-ResNet_0
+exp_name: CIFAR10-ResNet_1
 exp_cfg:
-  seed: 0
+  seed: 1
 
 agent: ImageClassifier
 agent_cfg:
@@ -14,20 +14,20 @@ agent_cfg:
       phases: [2, 2, 2, 2]
       reductions: [false, true, true, true]
       expansion_rate: 2
-      stem_out_channels: 8
+      stem_out_channels: 32
       use_stem: true
   optim:
-    name: Adam
+    name: SGD
     kwargs:
       lr: 0.0025
-      betas: [.5, .999]
+      momentum: .9
       weight_decay: 3.e-3
   
-  # scheduler:
-  #   name: CosineAnnealingLR
-  #   kwargs:
-  #     T_max: 200
-  #     eta_min: 0
+  scheduler:
+    name: CosineAnnealingLR
+    kwargs:
+      T_max: 200
+      eta_min: 0
 
 
 trainer:
@@ -49,8 +49,8 @@ data_loader:
   name: CIFAR10
   kwargs:
     root: ~/.torch
-    pin_memory: true
-    num_workers: 8
-    batch_size: 16
+    pin_memory: false
+    num_workers: 4
+    batch_size: 96
     cutout: true
     cutout_length: 8
