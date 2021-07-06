@@ -1,3 +1,7 @@
 {
-    "python.pythonPath": "/home/hoangson/miniconda3/envs/cuda/bin/python"
+    "python.pythonPath": "/home/hoangson/miniconda3/envs/cuda/bin/python",
+    "cSpell.words": [
+        "cuda",
+        "numpy"
+    ]
 }
