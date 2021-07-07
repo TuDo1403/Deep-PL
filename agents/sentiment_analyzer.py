@@ -24,8 +24,8 @@ class SentimentAnalyzer(pl.LightningModule):
 
         self.example_input_array = torch.rand(1, *cfg.input_shape).long()
 
-        self.h = None
-        self.val_h = None
+        self.h = self.net.init_hidden(self.cfg.batch_size)
+        self.val_h = self.net.init_hidden(self.cfg.batch_size)
     def forward(self, x, h=None):
         output, h = self.net(x, h)
 
@@ -41,12 +41,13 @@ class SentimentAnalyzer(pl.LightningModule):
     
     def training_step(self, train_batch, *args, **kwargs):
         inputs, targets = train_batch.text.T, train_batch.label
-        self.h = tuple([each.data for each in self.h]) if self.h else self.net.init_hidden(self.cfg.batch_size)
+        self.h = tuple([each.data for each in self.h])
         outputs, self.h = self(inputs, self.h)
         loss = self.criterion(outputs, targets)
-        pred = torch.round(outputs)
+
+        rounded_pred = torch.round(torch.sigmoid(outputs))
+        correct = rounded_pred.eq(targets.view_as(rounded_pred)).sum().item()
         total = targets.numel()
-        correct = pred.eq(targets.view_as(pred)).sum().item()
         self.log('train_loss', loss, prog_bar=True, logger=True)
         return {'loss': loss, 'correct': correct, 'total': total}
     
@@ -59,16 +60,15 @@ class SentimentAnalyzer(pl.LightningModule):
         self.log('train_err', train_err, prog_bar=True, logger=True, on_epoch=True)
         self.log('train_acc', 100 - train_err, prog_bar=True, logger=True, on_epoch=True)
 
+        self.h = self.net.init_hidden(self.cfg.batch_size)
+
     def validation_step(self, batch, *args, **kwargs):
         inputs, targets = batch.text.T, batch.label
-        self.val_h = tuple([each.data for each in self.val_h]) if self.val_h else self.net.init_hidden(self.cfg.batch_size)
-        outputs, self.val_h = self(inputs, self.val_h)
-        pred = torch.round(outputs)
-        # print('pred shape: {}'.format(pred.shape))
-        # print('target shape: {}'.format(targets.shape))
+        self.val_h = tuple([each.data for each in self.val_h])
+        outputs, self.val_h = self(inputs, self.h)
+        rounded_pred = torch.round(torch.sigmoid(outputs))
+        correct = rounded_pred.eq(targets.view_as(rounded_pred)).sum().item()
         total = targets.numel()
-        correct = pred.eq(targets.view_as(pred)).sum().item()
-
         return {'correct': correct, 'total': total}
 
     def validation_epoch_end(self, outputs) -> None:
@@ -79,3 +79,4 @@ class SentimentAnalyzer(pl.LightningModule):
         val_err = 100. * (1 - sum(correct) / sum(total))
         self.log('val_err', val_err, prog_bar=True, logger=True, on_epoch=True)
         self.log('val_acc', 100 - val_err, prog_bar=True, logger=True, on_epoch=True)
+        self.val_h = self.net.init_hidden(self.cfg.batch_size)

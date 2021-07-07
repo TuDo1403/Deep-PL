@@ -26,6 +26,7 @@ class RNN(nn.Module):
             input_size=embedding_dim,
             hidden_size=self.hidden_dim,
             num_layers=no_layers, 
+            dropout=drop_prob,
             batch_first=True
         )
         
@@ -34,13 +35,12 @@ class RNN(nn.Module):
         self.dropout = nn.Dropout(drop_prob)
     
         # linear and sigmoid layer
-        self.fc = nn.Linear(self.hidden_dim, output_dim)
+        self.fc = nn.Linear(hidden_dim, output_dim)
         # self.sig = nn.Sigmoid()
         
     def forward(self, x, hidden):
-        # print('input shape: {}'.format(x.size()))
         batch_size = x.size(0)
-        # assert batch_size == 5
+        x = x.long()
         # embeddings and lstm_out
         embeds = self.embedding(x)  # shape: B x S x Feature   since batch = True
         #print(embeds.shape)  #[50, 500, 1000]

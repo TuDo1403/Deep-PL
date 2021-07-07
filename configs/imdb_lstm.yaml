@@ -5,7 +5,7 @@ exp_cfg:
 agent: SentimentAnalyzer
 agent_cfg:
   input_shape: [25002]
-  batch_size: 50
+  batch_size: 5
   weight_init: kaiming_norm_fanout
   criterion: BCEWithLogitsLoss
   net:
@@ -50,5 +50,5 @@ logger:
 data_loader:
   name: IMDB
   kwargs:
-    batch_size: 50
-    root: .data
+    batch_size: 5
+    root: ~/.torch/
