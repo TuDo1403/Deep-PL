@@ -11,7 +11,7 @@ from libs.graphs.attention_model import *
 
 from utils.init_weight import init_model
 
-class SentimentAnalyzer(pl.LightningModule):
+class LSTMSentimentAnalyzer(pl.LightningModule):
     def __init__(self, cfg, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
@@ -40,10 +40,10 @@ class SentimentAnalyzer(pl.LightningModule):
         return optimizer
     
     def training_step(self, train_batch, *args, **kwargs):
-        inputs, targets = train_batch.text.T, train_batch.label
+        inputs, targets = train_batch
         self.h = tuple([each.data for each in self.h])
         outputs, self.h = self(inputs, self.h)
-        loss = self.criterion(outputs, targets)
+        loss = self.criterion(outputs, targets.view_as(outputs).float())
 
         rounded_pred = torch.round(torch.sigmoid(outputs))
         correct = rounded_pred.eq(targets.view_as(rounded_pred)).sum().item()
@@ -63,7 +63,7 @@ class SentimentAnalyzer(pl.LightningModule):
         self.h = self.net.init_hidden(self.cfg.batch_size)
 
     def validation_step(self, batch, *args, **kwargs):
-        inputs, targets = batch.text.T, batch.label
+        inputs, targets = batch
         self.val_h = tuple([each.data for each in self.val_h])
         outputs, self.val_h = self(inputs, self.h)
         rounded_pred = torch.round(torch.sigmoid(outputs))

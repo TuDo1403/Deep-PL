@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-class RNN(nn.Module):
+class LSTM(nn.Module):
     def __init__(self, 
                  output_dim,
                  no_layers,

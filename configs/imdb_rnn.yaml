@@ -1,21 +1,20 @@
-exp_name: IMDB-LSTM_1
+exp_name: IMDB-RNN_1
 exp_cfg:
   seed: 1
 
-agent: LSTMSentimentAnalyzer
+agent: RNNSentimentAnalyzer
 agent_cfg:
   input_shape: [2000]
-  batch_size: 64
+  batch_size: 1
   weight_init: kaiming_norm_fanout
   criterion: BCEWithLogitsLoss
   net:
-    name: LSTM
+    name: RNN
     kwargs:
-      vocab_size: 2000
+      input_dim: 2000
+      embedding_dim: 300
+      hidden_dim: 300 
       output_dim: 1
-      no_layers: 2
-      embedding_dim: 64
-      hidden_dim: 256
 
   optim:
     name: SGD
@@ -38,7 +37,7 @@ trainer:
 
 model_checkpoint:
   monitor: val_err
-  filename: '[LSTM-IMDB]-{epoch:02d}-{val_err:.2f}'
+  filename: '[RNN-IMDB]-{epoch:02d}-{val_err:.2f}'
   save_top_k: 5
   mode: min
   verbose: true
