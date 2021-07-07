@@ -8,3 +8,5 @@ pytorch-lightning==1.2.8
 click==8.0.1
 tensorboard==2.5.0
 tensorflow==2.4.1
+spacy
+torchtext==0.9.1

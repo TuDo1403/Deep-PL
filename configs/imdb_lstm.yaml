@@ -1,0 +1,54 @@
+exp_name: IMDB-LSTM_1
+exp_cfg:
+  seed: 1
+
+agent: SentimentAnalyzer
+agent_cfg:
+  input_shape: [25002]
+  batch_size: 50
+  weight_init: kaiming_norm_fanout
+  criterion: BCEWithLogitsLoss
+  net:
+    name: RNN
+    kwargs:
+      vocab_size: 25002
+      output_dim: 1
+      no_layers: 2
+      embedding_dim: 64
+      hidden_dim: 256
+
+  optim:
+    name: SGD
+    kwargs:
+      lr: 0.0025
+      momentum: .9
+      weight_decay: 3.e-3
+  
+  scheduler:
+    name: CosineAnnealingLR
+    kwargs:
+      T_max: 200
+      eta_min: 0
+
+
+trainer:
+  max_epochs: 200
+  gpus: 1
+  gradient_clip_val: .5
+
+model_checkpoint:
+  monitor: val_err
+  filename: '[LSTM-IMDB]-{epoch:02d}-{val_err:.2f}'
+  save_top_k: 5
+  mode: min
+  verbose: true
+
+logger:
+  save_dir:
+  log_graph: true
+
+data_loader:
+  name: IMDB
+  kwargs:
+    batch_size: 50
+    root: .data
