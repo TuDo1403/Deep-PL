@@ -1,22 +1,53 @@
-# from libs.utils import Encoder, Decoder
-# import tensorflow as tf
+from torch.nn.modules import utils
+from ....utils.pos_encode import PositionalEncoding, TokenEmbedding
+import torch
+from torch.nn import Transformer
+import torch.nn as nn
+from torch import Tensor
+import math
 
-# class Transformer(tf.keras.Model):
-#   def __init__(self, num_layers, d_model, num_heads, dff, input_vocab_size, target_vocab_size, pe_input, pe_target, rate=0.1):
-#     super(Transformer, self).__init__()
+class Seq2SeqTransformer(nn.Module):
+    def __init__(self,
+                 num_encoder_layers: int,
+                 num_decoder_layers: int,
+                 emb_size: int,
+                 nhead: int,
+                 src_vocab_size: int,
+                 tgt_vocab_size: int,
+                 dim_feedforward: int = 512,
+                 dropout: float = 0.1):
+        super(Seq2SeqTransformer, self).__init__()
+        self.transformer = Transformer(d_model=emb_size,
+                                       nhead=nhead,
+                                       num_encoder_layers=num_encoder_layers,
+                                       num_decoder_layers=num_decoder_layers,
+                                       dim_feedforward=dim_feedforward,
+                                       dropout=dropout)
+        self.generator = nn.Linear(emb_size, tgt_vocab_size)
+        self.src_tok_emb = TokenEmbedding(src_vocab_size, emb_size)
+        self.tgt_tok_emb = TokenEmbedding(tgt_vocab_size, emb_size)
+        self.positional_encoding = PositionalEncoding(
+            emb_size, dropout=dropout)
 
-#     self.tokenizer = Encoder(num_layers, d_model, num_heads, dff, input_vocab_size, pe_input, rate)
+    def forward(self,
+                src: Tensor,
+                trg: Tensor,
+                src_mask: Tensor,
+                tgt_mask: Tensor,
+                src_padding_mask: Tensor,
+                tgt_padding_mask: Tensor,
+                memory_key_padding_mask: Tensor):
+        src_emb = self.positional_encoding(self.src_tok_emb(src))
+        tgt_emb = self.positional_encoding(self.tgt_tok_emb(trg))
+        outs = self.transformer(src_emb, tgt_emb, src_mask, tgt_mask, None,
+                                src_padding_mask, tgt_padding_mask, memory_key_padding_mask)
+        return self.generator(outs)
 
-#     self.decoder = Decoder(num_layers, d_model, num_heads, dff, target_vocab_size, pe_target, rate)
+    def encode(self, src: Tensor, src_mask: Tensor):
+        return self.transformer.encoder(self.positional_encoding(
+                            self.src_tok_emb(src)), src_mask)
 
-#     self.final_layer = tf.keras.layers.Dense(target_vocab_size)
-
-#   def forward(self, inp, tar, training, enc_padding_mask, look_ahead_mask, dec_padding_mask):
-
-#     enc_output = self.tokenizer(inp, training, enc_padding_mask)
-
-#     dec_output, attention_weights = self.decoder(tar, enc_output, training, look_ahead_mask, dec_padding_mask)
-
-#     final_output = self.final_layer(dec_output)
-
-#     return final_output, attention_weights
+    def decode(self, tgt: Tensor, memory: Tensor, tgt_mask: Tensor):
+        return self.transformer.decoder(self.positional_encoding(
+                          self.tgt_tok_emb(tgt)), memory,
+                          tgt_mask)
