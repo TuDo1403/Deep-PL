@@ -1,0 +1,58 @@
+exp_name: IWSLT15-Transformer_1
+exp_cfg:
+  seed: 1
+
+agent: LangTranslator
+agent_cfg:
+  input_shape: [24420]
+  weight_init: kaiming_norm_fanout
+  criterion: CrossEntropyLoss
+  net:
+    name: Seq2SeqTransformer
+    kwargs:
+      num_encoder_layers: 3
+      num_decoder_layers: 3
+      nhead: 8
+      src_vocab_size: 24420
+      tgt_vocab_size: 10666
+      emb_size: 512
+      dim_feedforward: 512
+
+  optim:
+    name: Adam
+    kwargs:
+      lr: 0.0025
+      betas: [.5, .999]
+      # momentum: .9
+      weight_decay: 3.e-3
+  
+  # scheduler:
+  #   name: CosineAnnealingLR
+  #   kwargs:
+  #     T_max: 200
+  #     eta_min: 0
+
+
+trainer:
+  max_epochs: 200
+  gpus: 1
+  gradient_clip_val: .5
+
+model_checkpoint:
+  monitor: bleu_score_val
+  filename: '[Transformer-IWSLT15]-{epoch:02d}-{bleu_score_val:.2f}'
+  save_top_k: 5
+  mode: max
+  verbose: true
+
+logger:
+  save_dir:
+  log_graph: true
+
+data_loader:
+  name: IWSLT15
+  kwargs:
+    batch_size: 32
+    num_workers: 4
+    pin_memory: true
+    min_freq: 3

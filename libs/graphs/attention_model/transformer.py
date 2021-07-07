@@ -1,5 +1,5 @@
 from torch.nn.modules import utils
-from ....utils.pos_encode import PositionalEncoding, TokenEmbedding
+from utils.pos_encode import PositionalEncoding, TokenEmbedding
 import torch
 from torch.nn import Transformer
 import torch.nn as nn
@@ -22,7 +22,8 @@ class Seq2SeqTransformer(nn.Module):
                                        num_encoder_layers=num_encoder_layers,
                                        num_decoder_layers=num_decoder_layers,
                                        dim_feedforward=dim_feedforward,
-                                       dropout=dropout)
+                                       dropout=dropout
+                                       )
         self.generator = nn.Linear(emb_size, tgt_vocab_size)
         self.src_tok_emb = TokenEmbedding(src_vocab_size, emb_size)
         self.tgt_tok_emb = TokenEmbedding(tgt_vocab_size, emb_size)
@@ -51,3 +52,13 @@ class Seq2SeqTransformer(nn.Module):
         return self.transformer.decoder(self.positional_encoding(
                           self.tgt_tok_emb(tgt)), memory,
                           tgt_mask)
+
+    def evaluate(self, x, vocab_l_y, vocab_idx_y):
+        y = torch.Tensor([vocab_idx_y['<cls>']])
+        pred = []
+
+        for i in range(30):
+            input = y
+            input = input.unsqueeze(0)
+            input = self.tgt_tok_emb(input)
+            
