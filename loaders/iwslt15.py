@@ -80,7 +80,7 @@ class IWSLT15:
         train_set = torch.load('')
         self.train_loader = DataLoader(
             train_set,
-            batch_size=1,
+            batch_size=batch_size,
             drop_last=True,
             shuffle=True,
             pin_memory=pin_memory,
