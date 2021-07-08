@@ -26,6 +26,7 @@ class LangTranslator(pl.LightningModule):
         self.net = init_model(self.net, cfg.weight_init)
         self.corpus_en = torch.load('data/corpus_en.pth.tar')
         self.corpus_vi = torch.load('data/corpus_vi.pth.tar')
+        self.en, self.vi = torch.load('data/en_vi.pth.tar')
         # self.example_input_array = ({
         #     'src': torch.rand(93, 32),
         #     'trg': torch.rand(138, 32),
@@ -71,14 +72,14 @@ class LangTranslator(pl.LightningModule):
             'tgt_padding_mask': tgt_padding_mask,
             'memory_key_padding_mask': src_padding_mask,
         })
-        output_l = torch.argmax(logits, dim=0).tolist()
+        output_l = torch.argmax(logits.detach().cpu(), dim=0).tolist()
 
-        tgt_out = targets[:, 1:].T
-        loss = self.criterion(logits.reshape(-1, logits.size(-1)), tgt_out.reshape(-1))
+        tgt_out = targets[1:, :]
+        loss = self.criterion(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
 
         self.log('train_loss', loss, prog_bar=True, logger=True)
 
-        return {'loss': loss, 'pred': output_l, 'ref': targets}
+        return {'loss': loss, 'pred': output_l, 'ref': targets.detach()}
     
     def training_epoch_end(self, outputs) -> None:
         pred, ref = [], []
@@ -90,8 +91,8 @@ class LangTranslator(pl.LightningModule):
         score = bleu_score(pred, ref)
         self.log('bleu_score_train', score, prog_bar=True, logger=True, on_epoch=True)
 
-    def validation_step(self, batch, *args, **kwargs):
-        prep_en, prep_vi, inputs, targets = batch
+    def validation_step(self, batch, batch_idx, *args, **kwargs):
+        prep_en, prep_vi = batch
         prep_en = prep_en.squeeze(0).T; prep_vi = prep_vi.squeeze(0)
         # prep_en = torch.row_stack([torch.cat(row) for row in prep_en]).T
         # prep_vi = torch.row_stack([torch.cat(row) for row in prep_vi])
@@ -111,7 +112,7 @@ class LangTranslator(pl.LightningModule):
             'memory_key_padding_mask': src_padding_mask,
         })
         output_l = torch.argmax(logits, dim=0).tolist()
-        return {'pred': output_l, 'ref': targets}
+        return {'pred': output_l, 'ref': self.vi[batch_idx]}
 
     def validation_epoch_end(self, outputs) -> None:
         pred, ref = [], []
