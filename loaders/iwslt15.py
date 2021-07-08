@@ -77,7 +77,7 @@ class TMP:
         # test_data_encoding[0] = torch.from_numpy(np.array(test_data_encoding[0]))
         # test_data_encoding[1] = torch.from_numpy(np.array(test_data_encoding[1]))
 
-        train_set = torch.load('')
+        train_set = torch.load('data/train_set.pth.tar')
         self.train_loader = DataLoader(
             train_set,
             batch_size=batch_size,
