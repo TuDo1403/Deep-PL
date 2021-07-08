@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-=======
-from logging import log
-from types import coroutine
->>>>>>> ae97bc2fb274f636a16c1dd5303ef40d6d70443e
 from typing import Any
 import pytorch_lightning as pl
 
@@ -71,32 +66,11 @@ class LangTranslator(pl.LightningModule):
     
     def training_step(self, train_batch, *args, **kwargs):
         inputs, targets = train_batch
-<<<<<<< HEAD
-=======
-
-        # inputs = torch.row_stack([torch.cat(row) for row in inputs]).T
-        # targets = torch.row_stack([torch.cat(row) for row in targets])
-        inputs = inputs.T
-        targets = targets.T
-
->>>>>>> ae97bc2fb274f636a16c1dd5303ef40d6d70443e
         targets_input = targets[:-1, :]
 
         src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = \
             create_mask(inputs, targets_input, 1)
 
-<<<<<<< HEAD
-        logits = self({
-            'src': inputs,
-            'trg': targets_input,
-            'src_mask': src_mask,
-            'tgt_mask': tgt_mask,
-            'src_padding_mask': src_padding_mask,
-            'tgt_padding_mask': tgt_padding_mask,
-            'memory_key_padding_mask': src_padding_mask,
-        })
-        # output_l = torch.argmax(logits.detach().cpu(), dim=-1).tolist()
-=======
         logits = self(
             src=inputs,
             trg=targets_input,
@@ -107,7 +81,6 @@ class LangTranslator(pl.LightningModule):
             memory_key_padding_mask=src_padding_mask,
         )
         # output_l = torch.argmax(logits.detach().cpu(), dim=0).tolist()
->>>>>>> ae97bc2fb274f636a16c1dd5303ef40d6d70443e
 
         tgt_out = targets[1:, :]
         loss = self.criterion(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
@@ -127,7 +100,6 @@ class LangTranslator(pl.LightningModule):
     #     self.log('bleu_score_train', score, prog_bar=True, logger=True, on_epoch=True)
 
     def validation_step(self, batch, batch_idx, *args, **kwargs):
-<<<<<<< HEAD
         inputs, targets = batch
         # prep_en = prep_en.squeeze(0).T; prep_vi = prep_vi.squeeze(0)
         # prep_en = torch.row_stack([torch.cat(row) for row in prep_en]).T
@@ -135,33 +107,11 @@ class LangTranslator(pl.LightningModule):
 
         # targets_input = prep_vi[:, :-1].T
         targets_input = targets[:-1, :]
-=======
-        prep_en, prep_vi = batch
-        prep_en = prep_en.T; prep_vi = prep_vi.T
-        # prep_en = torch.row_stack([torch.cat(row) for row in prep_en]).T
-        # prep_vi = torch.row_stack([torch.cat(row) for row in prep_vi])
-
-        targets_input = prep_vi[:-1, :]
-
->>>>>>> ae97bc2fb274f636a16c1dd5303ef40d6d70443e
         src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = \
             create_mask(inputs, targets_input, 1)
 
-<<<<<<< HEAD
-        logits = self({
-            'src':inputs,
-            'trg':targets_input,
-            'src_mask': src_mask,
-            'tgt_mask': tgt_mask,
-            'src_padding_mask': src_padding_mask,
-            'tgt_padding_mask': tgt_padding_mask,
-            'memory_key_padding_mask': src_padding_mask,
-        })
-
-        output_l = torch.argmax(logits.detach().cpu(), dim=-1).tolist()
-=======
         logits = self(
-            src=prep_en,
+            src=inputs,
             trg=targets_input,
             src_mask=src_mask,
             tgt_mask=tgt_mask,
@@ -171,7 +121,6 @@ class LangTranslator(pl.LightningModule):
         )
         # logits = logits.permute(1, 0, 2)
         output_l = torch.argmax(logits.detach().cpu(), dim=0).tolist()
->>>>>>> ae97bc2fb274f636a16c1dd5303ef40d6d70443e
         return {'pred': output_l, 'ref': self.vi[batch_idx]}
 
     def validation_epoch_end(self, outputs) -> None:
