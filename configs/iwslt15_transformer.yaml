@@ -13,8 +13,8 @@ agent_cfg:
       num_encoder_layers: 3
       num_decoder_layers: 3
       nhead: 8
-      src_vocab_size: 24420
-      tgt_vocab_size: 10666
+      src_vocab_size: 10000
+      tgt_vocab_size: 10000
       emb_size: 512
       dim_feedforward: 512
 

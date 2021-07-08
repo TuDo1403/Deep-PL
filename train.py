@@ -42,5 +42,5 @@ def cli(config):
     )
 
 if __name__ == '__main__':
-    #cli(['-cfg', 'configs/imdb_lstm.yaml'])
-    cli()
+    cli(['-cfg', 'configs/iwslt15_transformer.yaml'])
+    # cli()
