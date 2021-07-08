@@ -13,8 +13,8 @@ agent_cfg:
       num_encoder_layers: 3
       num_decoder_layers: 3
       nhead: 8
-      src_vocab_size: 10000
-      tgt_vocab_size: 10000
+      src_vocab_size: 24420
+      tgt_vocab_size: 10666
       emb_size: 512
       dim_feedforward: 512
 
@@ -52,7 +52,7 @@ logger:
 data_loader:
   name: IWSLT15
   kwargs:
-    batch_size: 32
+    batch_size: 1
     num_workers: 4
     pin_memory: true
     min_freq: 3

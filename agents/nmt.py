@@ -1,3 +1,4 @@
+from logging import log
 from types import coroutine
 from typing import Any
 import pytorch_lightning as pl
@@ -55,10 +56,10 @@ class LangTranslator(pl.LightningModule):
 
         # inputs = torch.row_stack([torch.cat(row) for row in inputs]).T
         # targets = torch.row_stack([torch.cat(row) for row in targets])
-        inputs = inputs.squeeze(0).T
-        targets = targets.squeeze(0)
+        inputs = inputs.T
+        targets = targets.T
 
-        targets_input = targets[:, :-1].T
+        targets_input = targets[:-1, :]
 
         src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = \
             create_mask(inputs, targets_input, 1)
@@ -72,14 +73,14 @@ class LangTranslator(pl.LightningModule):
             'tgt_padding_mask': tgt_padding_mask,
             'memory_key_padding_mask': src_padding_mask,
         })
-        output_l = torch.argmax(logits.detach().cpu(), dim=0).tolist()
+        # output_l = torch.argmax(logits.detach().cpu(), dim=0).tolist()
 
         tgt_out = targets[1:, :]
         loss = self.criterion(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
 
         self.log('train_loss', loss, prog_bar=True, logger=True)
 
-        return {'loss': loss, 'pred': output_l, 'ref': targets.detach()}
+        return {'loss': loss}
     
     def training_epoch_end(self, outputs) -> None:
         pred, ref = [], []
@@ -93,11 +94,11 @@ class LangTranslator(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx, *args, **kwargs):
         prep_en, prep_vi = batch
-        prep_en = prep_en.squeeze(0).T; prep_vi = prep_vi.squeeze(0)
+        prep_en = prep_en.T; prep_vi = prep_vi.T
         # prep_en = torch.row_stack([torch.cat(row) for row in prep_en]).T
         # prep_vi = torch.row_stack([torch.cat(row) for row in prep_vi])
 
-        targets_input = prep_vi[:, :-1].T
+        targets_input = prep_vi[:-1, :]
 
         src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = \
             create_mask(prep_en, targets_input, 1)
@@ -111,7 +112,8 @@ class LangTranslator(pl.LightningModule):
             'tgt_padding_mask': tgt_padding_mask,
             'memory_key_padding_mask': src_padding_mask,
         })
-        output_l = torch.argmax(logits, dim=0).tolist()
+        # logits = logits.permute(1, 0, 2)
+        output_l = torch.argmax(logits.detach().cpu(), dim=0).tolist()
         return {'pred': output_l, 'ref': self.vi[batch_idx]}
 
     def validation_epoch_end(self, outputs) -> None:
@@ -119,7 +121,7 @@ class LangTranslator(pl.LightningModule):
         for out in outputs:
             sentences = [[self.corpus_en[word][0] for word in sentence] for sentence in out['pred']]
             pred += [*sentences]
-            ref += [*out['ref']]
+            ref += [out['ref']]
         # pred = [[self.corpus_en[word][0] for word in sentence] for sentence in pred]
         score = bleu_score(pred, ref)
         self.log('bleu_score_val', score, prog_bar=True, logger=True, on_epoch=True)
