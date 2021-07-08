@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 from torch.utils.data.dataset import TensorDataset
 
-class IWSLT15:
+class TMP:
     def __init__(self, 
                  batch_size=128,
                  pin_memory=True,

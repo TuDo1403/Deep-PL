@@ -100,18 +100,18 @@ class LangTranslator(pl.LightningModule):
     #     self.log('bleu_score_train', score, prog_bar=True, logger=True, on_epoch=True)
 
     def validation_step(self, batch, batch_idx, *args, **kwargs):
-        prep_en, prep_vi = batch
-        prep_en = prep_en.squeeze(0).T; prep_vi = prep_vi.squeeze(0)
+        inputs, targets = batch
+        # prep_en = prep_en.squeeze(0).T; prep_vi = prep_vi.squeeze(0)
         # prep_en = torch.row_stack([torch.cat(row) for row in prep_en]).T
         # prep_vi = torch.row_stack([torch.cat(row) for row in prep_vi])
 
-        targets_input = prep_vi[:, :-1].T
-
+        # targets_input = prep_vi[:, :-1].T
+        targets_input = targets[:-1, :]
         src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = \
-            create_mask(prep_en, targets_input, 1)
+            create_mask(inputs, targets_input, 1)
 
         logits = self({
-            'src':prep_en,
+            'src':inputs,
             'trg':targets_input,
             'src_mask': src_mask,
             'tgt_mask': tgt_mask,
@@ -120,7 +120,7 @@ class LangTranslator(pl.LightningModule):
             'memory_key_padding_mask': src_padding_mask,
         })
 
-        output_l = torch.argmax(logits.detach().cpu(), dim=0).tolist()
+        output_l = torch.argmax(logits.detach().cpu(), dim=-1).tolist()
         return {'pred': output_l, 'ref': self.vi[batch_idx]}
 
     def validation_epoch_end(self, outputs) -> None:
@@ -156,11 +156,13 @@ class LangTranslator(pl.LightningModule):
                 break
         return ys
 
+    
+
 
     # actual function to translate input sentence into target language
-    def translate(self, src_sentence: str):
-        self.net.eval()
-        src = self.text_transform[self.SRC_LANGUAGE](src_sentence).view(-1, 1)
+    def translate(self, src):
+        # self.net.eval()
+        # src = self.text_transform[self.SRC_LANGUAGE](src_sentence).view(-1, 1)
         num_tokens = src.shape[0]
         src_mask = (torch.zeros(num_tokens, num_tokens)).type(torch.bool)
         tgt_tokens = self.greedy_decode(
@@ -171,5 +173,10 @@ class LangTranslator(pl.LightningModule):
             start_symbol=self.BOS_IDX
         ).flatten()
 
-        return \
-            " ".join(self.vocab_transform[self.TGT_LANGUAGE].lookup_tokens(list(tgt_tokens.cpu().numpy()))).replace("<bos>", "").replace("<eos>", "")
+        res = self.vocab_transform[self.TGF_LANGUAGE].lookup_tokens(list(tgt_tokens.cpu().numpy()))
+        for i in range(len(res)):
+            if res[i] == '<eos>' or res[i] == '<bos>':
+                res[i] = ''
+        return res
+        # return \
+        #     " ".join(self.vocab_transform[self.TGT_LANGUAGE].lookup_tokens(list(tgt_tokens.cpu().numpy()))).replace("<bos>", "").replace("<eos>", "")

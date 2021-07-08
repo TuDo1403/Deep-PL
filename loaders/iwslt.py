@@ -1,9 +1,10 @@
+from typing import List
 import torch
 from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
 
 from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import vocab
+from torchtext.vocab import Vocab, vocab
 
 from collections import OrderedDict
 
@@ -17,7 +18,8 @@ class IWSLT15:
     def __init__(self, 
                  batch_size, 
                  num_workers, 
-                 pin_memory) -> None:
+                 pin_memory,
+                 **kwargs) -> None:
         self.token_transform = {
             self.SRC_LANGUAGE: get_tokenizer('spacy', language='en_core_web_sm'),
             self.TGT_LANGUAGE: get_tokenizer('spacy', language='vi_core_news_lg')
@@ -28,11 +30,13 @@ class IWSLT15:
             counter = torch.load(file_paths[i])
             sorted_by_freq_tuples = sorted(counter.items(), key=lambda x: x[1], reverse=True)
             ordered_dict = OrderedDict(sorted_by_freq_tuples)
-            self.vocab_transform[ln] = vocab(ordered_dict, 3)
-        for ln in [self.SRC_LANGUAGE, self.TGT_LANGUAGE]:
-            self.vocab_transform[ln].set_default_index(self.UNK_IDX)
-        assert len(self.vocab_transform[self.SRC_LANGUAGE]) == 24416
-        assert len(self.vocab_transform[self.TGT_LANGUAGE]) == 10662
+            self.vocab_transform[ln] = vocab(ordered_dict)
+        # for ln in [self.SRC_LANGUAGE, self.TGT_LANGUAGE]:
+        #     self.vocab_transform[ln].set_default_index(self.UNK_IDX)
+        print(len(self.vocab_transform[self.SRC_LANGUAGE]))
+        print(len(self.vocab_transform[self.TGT_LANGUAGE]))
+        # assert len(self.vocab_transform[self.SRC_LANGUAGE]) == 24416
+        # assert len(self.vocab_transform[self.TGT_LANGUAGE]) == 10662
 
         # src and tgt language text transforms to convert raw strings into tensors indices
         self.text_transform = {}
@@ -43,8 +47,8 @@ class IWSLT15:
                 self.tensor_transform
             )
 
-        train_iter = list(torch.load(''))
-        val_iter = list(torch.load(''))
+        train_iter = list(torch.load('data/train_iter.pth.tar'))
+        val_iter = list(torch.load('data/test_iter.pth.tar'))
 
         self.train_loader = DataLoader(
             train_iter,
@@ -79,3 +83,9 @@ class IWSLT15:
                 txt_input = transform(txt_input)
             return txt_input
         return func
+
+
+    def tensor_transform(self, token_ids: List[int]):
+        return torch.cat((torch.tensor([self.BOS_IDX]), 
+                        torch.tensor(token_ids), 
+                        torch.tensor([self.EOS_IDX])))
