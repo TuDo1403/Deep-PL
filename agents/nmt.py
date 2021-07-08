@@ -38,8 +38,8 @@ class LangTranslator(pl.LightningModule):
         #     'memory_key_padding_mask': torch.rand(32, 93).bool(),
         # })
 
-    def forward(self, x):
-        output = self.net(**x)
+    def forward(self, **kwargs):
+        output = self.net(**kwargs)
 
         return output
 
@@ -64,15 +64,15 @@ class LangTranslator(pl.LightningModule):
         src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = \
             create_mask(inputs, targets_input, 1)
 
-        logits = self({
-            'src': inputs,
-            'trg': targets_input,
-            'src_mask': src_mask,
-            'tgt_mask': tgt_mask,
-            'src_padding_mask': src_padding_mask,
-            'tgt_padding_mask': tgt_padding_mask,
-            'memory_key_padding_mask': src_padding_mask,
-        })
+        logits = self(
+            src=inputs,
+            trg=targets_input,
+            src_mask=src_mask,
+            tgt_mask=tgt_mask,
+            src_padding_mask=src_padding_mask,
+            tgt_padding_mask=tgt_padding_mask,
+            memory_key_padding_mask=src_padding_mask,
+        )
         # output_l = torch.argmax(logits.detach().cpu(), dim=0).tolist()
 
         tgt_out = targets[1:, :]
@@ -103,15 +103,15 @@ class LangTranslator(pl.LightningModule):
         src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = \
             create_mask(prep_en, targets_input, 1)
 
-        logits = self({
-            'src':prep_en,
-            'trg':targets_input,
-            'src_mask': src_mask,
-            'tgt_mask': tgt_mask,
-            'src_padding_mask': src_padding_mask,
-            'tgt_padding_mask': tgt_padding_mask,
-            'memory_key_padding_mask': src_padding_mask,
-        })
+        logits = self(
+            src=prep_en,
+            trg=targets_input,
+            src_mask=src_mask,
+            tgt_mask=tgt_mask,
+            src_padding_mask=src_padding_mask,
+            tgt_padding_mask=tgt_padding_mask,
+            memory_key_padding_mask=src_padding_mask,
+        )
         # logits = logits.permute(1, 0, 2)
         output_l = torch.argmax(logits.detach().cpu(), dim=0).tolist()
         return {'pred': output_l, 'ref': self.vi[batch_idx]}

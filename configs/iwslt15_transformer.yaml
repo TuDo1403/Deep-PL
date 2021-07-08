@@ -52,7 +52,7 @@ logger:
 data_loader:
   name: IWSLT15
   kwargs:
-    batch_size: 1
+    batch_size: 16
     num_workers: 4
     pin_memory: true
     min_freq: 3
