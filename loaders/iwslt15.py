@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
   
 
 import numpy as np
+from torch.utils.data.dataset import TensorDataset
 
 class IWSLT15:
     def __init__(self, 
@@ -43,9 +44,13 @@ class IWSLT15:
         # train_data.sort(key = lambda x: (len(x[0]), len(x[1])))
         # test_data = list(zip(test_en_prep, test_vi_prep, test_en, test_vi))
 
+        # full_batch_train = len(train_data)
+        # full_batch_test = len(test_data)
+
+
         # print('Batch making')
-        # train_data_bb = self.make_batch(train_data, batch_size)
-        # test_data_bb = self.make_batch_test(test_data, batch_size)
+        # train_data_bb = self.make_batch(train_data, full_batch_train)
+        # test_data_bb = self.make_batch_test(test_data, full_batch_test)
 
         # print('Padding')
         # train_data_pd = self.padding(train_data_bb)
@@ -64,16 +69,17 @@ class IWSLT15:
         # torch.save(train_data_encoding, 'data/iwslt15_train_32.pth.tar')
         # torch.save(test_data_encoding, 'data/iwslt15_test_32.pth.tar')
 
-        train_data_encoding = torch.load('data/iwslt15_train_32.pth.tar')
-        test_data_encoding = torch.load('data/iwslt15_test_32.pth.tar')
+        # train_data_encoding = torch.load('data/iwslt15_train_32.pth.tar')
+        # test_data_encoding = torch.load('data/iwslt15_test_32.pth.tar')
 
         # train_data_encoding[0] = torch.from_numpy(np.array(train_data_encoding[0]))
         # train_data_encoding[1] = torch.from_numpy(np.array(train_data_encoding[1]))
         # test_data_encoding[0] = torch.from_numpy(np.array(test_data_encoding[0]))
         # test_data_encoding[1] = torch.from_numpy(np.array(test_data_encoding[1]))
 
+        train_set = torch.load('')
         self.train_loader = DataLoader(
-            train_data_encoding,
+            train_set,
             batch_size=1,
             drop_last=True,
             shuffle=True,
@@ -81,10 +87,11 @@ class IWSLT15:
             num_workers=num_workers,
         )
 
+        test_set = torch.load('data/test_set.pth.tar')
         self.test_loader = DataLoader(
-            test_data_encoding,
+            test_set,
             batch_size=1,
-            drop_last=True,
+            drop_last=False,
             shuffle=False,
             pin_memory=pin_memory,
             num_workers=num_workers
