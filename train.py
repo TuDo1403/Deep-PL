@@ -43,4 +43,4 @@ def cli(config):
 
 if __name__ == '__main__':
     # cli(['-cfg', 'configs/iwslt15_transformer.yaml'])
-    cli()
+    cli(['-cfg', 'configs/fashion_mnist_mlp.yaml'])

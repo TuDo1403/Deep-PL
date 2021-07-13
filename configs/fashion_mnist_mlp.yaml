@@ -4,7 +4,7 @@ exp_cfg:
 
 agent: ImageClassifier
 agent_cfg:
-  input_shape: [1, 28, 28]
+  input_shape: [784]
   weight_init: kaiming_norm_fanout
   criterion: CrossEntropyLoss
   net:
@@ -48,6 +48,7 @@ data_loader:
     root: ~/.torch
     pin_memory: true
     num_workers: 4
+    drop_last: true
     batch_size: 96
     cutout: true
     cutout_length: 8

@@ -7,6 +7,7 @@ from torch import optim
 from torch.optim import lr_scheduler
 
 from libs.graphs.cnn import *
+from libs.graphs.mlp import *
 
 from utils.init_weight import init_model
 

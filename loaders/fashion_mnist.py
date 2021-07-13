@@ -10,7 +10,7 @@ class FashionMNIST:
     FASHION_MNIST_MEAN = (.1307,)
     FASHION_MNIST_STD = (.3081)
     def __init__(self, 
-                 data_folder, 
+                 root, 
                  num_workers, 
                  batch_size, 
                  pin_memory,
@@ -22,21 +22,21 @@ class FashionMNIST:
         train_transform = transforms.Compose([transforms.RandomCrop(28, padding=4),
                                               transforms.RandomHorizontalFlip(),
                                               transforms.ToTensor(),
-                                              transforms.Normalize(self.FASHION_MNIST_MEAN, self.FASHION_MNIST_STD),
-                                              torch.flatten])
+                                              transforms.Normalize(self.FASHION_MNIST_MEAN, self.FASHION_MNIST_STD)])
         if cutout:
             print('Using Cut out: {}'.format(cutout_length))
             train_transform.transforms.append(Cutout(cutout_length))
+        train_transform.transforms += [torch.flatten]
         valid_transform = transforms.Compose([transforms.ToTensor(), 
                                               transforms.Normalize(self.FASHION_MNIST_MEAN, self.FASHION_MNIST_STD),
                                               torch.flatten])
 
-        train_data = datasets.FashionMNIST(root=data_folder,
+        train_data = datasets.FashionMNIST(root=root,
                                       train=True,
                                       download=True,
                                       transform=train_transform)
 
-        test_data = datasets.FashionMNIST(root=data_folder,
+        test_data = datasets.FashionMNIST(root=root,
                                      train=False,
                                      download=False,
                                      transform=valid_transform)

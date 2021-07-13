@@ -27,6 +27,7 @@ class MultiLayerPerceptron(nn.Module):
         self.last_layer = nn.Linear(backbones[-1][0], out_features)
 
     def forward(self, x):
+        out = x
         for layer in self.layers:
-            x = layer(x)
-        return self.last_layer(x)
+            out = layer(out)
+        return out.view(out.size(0), -1), self.last_layer(out)
