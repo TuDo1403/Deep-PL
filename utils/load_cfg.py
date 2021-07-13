@@ -21,6 +21,8 @@ def load_cfg(path):
             datetime.datetime.now().strftime("%Y%m%d-%H%M")
         )
     )
+    seed = cfg.exp_cfg.seed
+    cfg.exp_name += '_S{:0>2d}'.format(seed)
     cfg.logger.save_dir = os.path.join('exps', cfg.exp_name, 'summaries/')
     cfg.checkpoint_dir = os.path.join('exps', cfg.exp_name, 'checkpoints/')
     cfg.out_dir = os.path.join('exps', cfg.exp_name, 'out/')
