@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
 
 from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import Vocab, vocab
+from torchtext.vocab import Vocab
 
 from collections import OrderedDict
 
@@ -30,7 +30,7 @@ class IWSLT15:
             counter = torch.load(file_paths[i])
             sorted_by_freq_tuples = sorted(counter.items(), key=lambda x: x[1], reverse=True)
             ordered_dict = OrderedDict(sorted_by_freq_tuples)
-            self.vocab_transform[ln] = vocab(ordered_dict)
+            self.vocab_transform[ln] = Vocab(ordered_dict)
         # for ln in [self.SRC_LANGUAGE, self.TGT_LANGUAGE]:
         #     self.vocab_transform[ln].set_default_index(self.UNK_IDX)
         print(len(self.vocab_transform[self.SRC_LANGUAGE]))

@@ -2,7 +2,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import os
 import torchvision.datasets as datasets
-from utils.neural_net import Cutout
+from utils import Cutout
 
 import torch
 
